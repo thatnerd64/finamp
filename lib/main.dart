@@ -41,6 +41,10 @@ import 'package:finamp/services/client_certificate_installer.dart';
 import 'package:finamp/services/data_source_service.dart';
 import 'package:finamp/services/dbus_manager.dart';
 import 'package:finamp/services/discord_rpc.dart';
+import 'package:finamp/services/external_accounts_store.dart';
+import 'package:finamp/services/scrobble_service.dart';
+import 'package:finamp/screens/scrobbling_settings_screen.dart';
+import 'package:finamp/screens/discord_login_screen.dart';
 import 'package:finamp/services/downloads_service.dart';
 import 'package:finamp/services/downloads_service_backend.dart';
 import 'package:finamp/services/finamp_logs_helper.dart';
@@ -167,7 +171,11 @@ Future<void> main(List<String> args, {bool integrationTesting = false, bool logi
     _mainLog.info("Setup os integrations");
     await _setupPlayOnService();
     _mainLog.info("Setup PlayOnService");
+    GetIt.instance.registerSingleton(await ExternalAccountsStore.create());
+    _mainLog.info("Setup external accounts store");
     await _setupPlaybackServices();
+    GetIt.instance.registerSingleton(ScrobbleService());
+    _mainLog.info("Setup scrobbling");
     _mainLog.info("Setup audio player");
     await _setupKeepScreenOnHelper();
     _mainLog.info("Setup KeepScreenOnHelper");
@@ -1016,6 +1024,8 @@ class FinampApp extends ConsumerWidget {
         DownloadsSettingsScreen.routeName: (context) => const DownloadsSettingsScreen(),
         AddDownloadLocationScreen.routeName: (context) => const AddDownloadLocationScreen(),
         PlaybackReportingSettingsScreen.routeName: (context) => const PlaybackReportingSettingsScreen(),
+        ScrobblingSettingsScreen.routeName: (context) => const ScrobblingSettingsScreen(),
+        DiscordLoginScreen.routeName: (context) => const DiscordLoginScreen(),
         AudioServiceSettingsScreen.routeName: (context) => const AudioServiceSettingsScreen(),
         VolumeNormalizationSettingsScreen.routeName: (context) => const VolumeNormalizationSettingsScreen(),
         InteractionSettingsScreen.routeName: (context) => const InteractionSettingsScreen(),

@@ -61,7 +61,9 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            resValue "string", "app_name", "Finamp"
+            // Fork builds install next to the official app instead of clashing with its signature.
+            applicationIdSuffix '.fork'
+            resValue "string", "app_name", "Finamp Fork"
             // shrinkResources false
             // minifyEnabled false
         }
