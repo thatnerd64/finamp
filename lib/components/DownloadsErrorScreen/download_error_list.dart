@@ -30,7 +30,11 @@ class DownloadErrorList extends StatelessWidget {
       sliver: SliverList.builder(
         itemCount: children.length,
         itemBuilder: (context, index) {
-          return DownloadErrorListTile(downloadTask: children[index], showType: state == DownloadItemState.syncFailed);
+          return DownloadErrorListTile(
+            downloadTask: children[index],
+            showType: state == DownloadItemState.syncFailed,
+            canRetry: state == DownloadItemState.failed || state == DownloadItemState.syncFailed,
+          );
         },
       ),
     );

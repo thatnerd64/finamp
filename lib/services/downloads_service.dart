@@ -545,6 +545,37 @@ class DownloadsService {
     }
   }
 
+  /// Retries failed downloads/syncs.  Each item is re-synced like [resync]
+  /// does, which deletes any partial file and enqueues the download again,
+  /// but all of them go through one sync pass instead of one pass each.
+  Future<void> retryItems(List<DownloadStub> stubs) async {
+    if (stubs.isEmpty) return;
+    _consecutiveConnectionErrors = 0;
+    _fileSystemFull = false;
+    fullSpeedSync = true;
+    forceFullSync = true;
+    try {
+      _downloadsLogger.info("Retrying ${stubs.length} failed item(s).");
+      _isar.writeTxnSync(() {
+        final required = <int>[];
+        final info = <int>[];
+        for (final stub in stubs) {
+          final requiredBy = _isar.downloadItems.filter().requires((q) => q.isarIdEqualTo(stub.isarId)).countSync();
+          (requiredBy != 0 ? required : info).add(stub.isarId);
+        }
+        syncBuffer.addAll(required, info, null);
+      });
+      await syncBuffer.executeSyncs();
+      await deleteBuffer.executeDeletes();
+      unawaited(downloadTaskQueue.executeDownloads());
+    } catch (error, stackTrace) {
+      _downloadsLogger.severe("Retry failed: $error", error, stackTrace);
+      rethrow;
+    } finally {
+      forceFullSync = false;
+    }
+  }
+
   /// Attempts to clean up any possible issues with downloads by removing stuck downloads,
   /// deleting node links that violate the node hierarchy, running [_syncDelete] on every node
   /// to clear out any orphans, and deleting any file in the internal download locations with

@@ -6,6 +6,7 @@ import 'package:finamp/components/TranscodingSettingsScreen/transcode_switch.dar
 import 'package:finamp/components/finamp_app_bar_back_button.dart';
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/models/finamp_models.dart';
+import 'package:finamp/services/external_accounts_store.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +36,7 @@ class _TranscodingSettingsScreenState extends State<TranscodingSettingsScreen> {
         padding: const EdgeInsets.only(bottom: 200.0),
         children: [
           const TranscodeSwitch(),
+          if (Platform.isAndroid || Platform.isIOS) const TranscodeOnMobileDataSwitch(),
           const StreamingTranscodingFormatDropdownListTile(),
           const BitrateSelector(),
           Divider(),
@@ -45,6 +47,27 @@ class _TranscodingSettingsScreenState extends State<TranscodingSettingsScreen> {
           const MultichannelHandlingSelector(),
         ],
       ),
+    );
+  }
+}
+
+/// Transcode only while on mobile data; the main switch above overrides it.
+class TranscodeOnMobileDataSwitch extends ConsumerWidget {
+  const TranscodeOnMobileDataSwitch({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final store = ref.watch(externalAccountsProvider);
+    final alwaysTranscode = ref.watch(finampSettingsProvider.shouldTranscode);
+    return SwitchListTile.adaptive(
+      title: const Text("Transcode on mobile data only"),
+      subtitle: Text(
+        alwaysTranscode
+            ? "Turn off \"Enable transcoding\" above to use this"
+            : "Original quality on Wi-Fi, the format and bitrate below on mobile data",
+      ),
+      value: store.transcodeOnMobileData,
+      onChanged: alwaysTranscode ? null : store.setTranscodeOnMobileData,
     );
   }
 }

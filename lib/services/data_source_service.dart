@@ -11,6 +11,7 @@ import 'package:get_it/get_it.dart';
 import 'package:logging/logging.dart';
 
 import 'finamp_settings_helper.dart';
+import 'mobile_data_transcoding.dart';
 
 Logger _dataSourceServiceLogger = Logger("Data Source Service");
 
@@ -140,14 +141,14 @@ class DataSourceService {
     });
 
     ref.listen(finampSettingsProvider.transcodingStreamingFormat, (_, transcodingStreamingFormat) {
-      if (FinampSettingsHelper.finampSettings.shouldTranscode) {
+      if (MobileDataTranscoding.shouldTranscode) {
         _dataSourceServiceLogger.info("Transcoding Streaming Format Changed: $transcodingStreamingFormat");
         _onDataSourceChange(SourceChangeType.toTranscoding);
       }
     });
 
     ref.listen(finampSettingsProvider.transcodeBitrate, (_, transcodeBitrate) {
-      if (FinampSettingsHelper.finampSettings.shouldTranscode) {
+      if (MobileDataTranscoding.shouldTranscode) {
         _dataSourceServiceLogger.info("Transcoding Bitrate Changed: $transcodeBitrate");
         _onDataSourceChange(SourceChangeType.toTranscoding);
       }
@@ -159,6 +160,11 @@ class DataSourceService {
       _onDataSourceChange(isLocalUrl ? SourceChangeType.toLocalUrl : SourceChangeType.toRemoteUrl);
     });
   }
+
+  /// Called when transcoding turns on/off for a reason other than the main
+  /// switch, e.g. moving between Wi-Fi and mobile data.
+  static Future<void> notifyTranscodingChanged(bool transcode) =>
+      _onDataSourceChange(transcode ? SourceChangeType.toTranscoding : SourceChangeType.toDirectPlay);
 
   static Future<void> _onDataSourceChange(SourceChangeType event) async {
     if (!GetIt.instance.isRegistered<QueueService>()) return;

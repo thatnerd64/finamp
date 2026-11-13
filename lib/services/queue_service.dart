@@ -12,6 +12,7 @@ import 'package:finamp/gen/assets.gen.dart';
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/models/finamp_models.dart';
 import 'package:finamp/models/jellyfin_models.dart' as jellyfin_models;
+import 'package:finamp/services/mobile_data_transcoding.dart';
 import 'package:finamp/services/album_image_provider.dart';
 import 'package:finamp/services/current_album_image_provider.dart';
 import 'package:finamp/services/downloads_service.dart';
@@ -1583,7 +1584,7 @@ class QueueService {
         //!!! this ID has to be consistent across the transcoding URL and the playback reporting status, otherwise the server won't show that we're transcoding
         "playSessionId": uuid.v4(),
         "itemJson": item.toJson(setOffline: false),
-        "shouldTranscode": FinampSettingsHelper.finampSettings.shouldTranscode,
+        "shouldTranscode": MobileDataTranscoding.shouldTranscode,
         "downloadedTrackPath": downloadedTrack?.file?.path,
         "isDownloaded": isDownloaded,
         "android.media.extra.DOWNLOAD_STATUS": isDownloaded ? 2 : 0,

@@ -30,6 +30,7 @@ class ExternalAccountsStore extends ChangeNotifier {
   static const _kLfmUser = "${_prefix}lastFmUser";
   static const _kScrobbleQueue = "${_prefix}scrobbleQueue";
   static const _kSendNowPlaying = "${_prefix}scrobbleNowPlaying";
+  static const _kTranscodeOnMobile = "${_prefix}transcodeOnMobileData";
 
   static const defaultListenBrainzUrl = "https://api.listenbrainz.org";
 
@@ -53,6 +54,7 @@ class ExternalAccountsStore extends ChangeNotifier {
           _kLfmUser,
           _kScrobbleQueue,
           _kSendNowPlaying,
+          _kTranscodeOnMobile,
         },
       ),
     );
@@ -158,6 +160,12 @@ class ExternalAccountsStore extends ChangeNotifier {
 
   bool get sendNowPlaying => _prefs.getBool(_kSendNowPlaying) ?? true;
   Future<void> setSendNowPlaying(bool v) => _setBool(_kSendNowPlaying, v);
+
+  // Playback
+
+  /// Transcode only while on mobile data (see MobileDataTranscoding).
+  bool get transcodeOnMobileData => _prefs.getBool(_kTranscodeOnMobile) ?? false;
+  Future<void> setTranscodeOnMobileData(bool v) => _setBool(_kTranscodeOnMobile, v);
 
   /// Scrobbles that could not be sent yet, oldest first. Each entry is a JSON
   /// object understood by [ScrobbleService].

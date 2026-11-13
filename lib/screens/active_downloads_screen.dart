@@ -37,6 +37,28 @@ class ActiveDownloadsScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.activeDownloadsTitle),
         leading: FinampAppBarBackButton(),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: "Retry all failed",
+            onPressed: () async {
+              try {
+                final failed = [
+                  ...await downloadsService.getDownloadList(DownloadItemState.syncFailed).first,
+                  ...await downloadsService.getDownloadList(DownloadItemState.failed).first,
+                ];
+                if (failed.isEmpty) {
+                  GlobalSnackbar.message((_) => "Nothing has failed");
+                  return;
+                }
+                GlobalSnackbar.message((_) => "Retrying ${failed.length} item(s)");
+                await downloadsService.retryItems(failed);
+              } catch (e) {
+                GlobalSnackbar.error(e);
+              }
+            },
+          ),
+        ],
       ),
       body: StreamBuilder(
         stream: stream,

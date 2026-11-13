@@ -43,6 +43,7 @@ import 'package:finamp/services/dbus_manager.dart';
 import 'package:finamp/services/discord_rpc.dart';
 import 'package:finamp/services/external_accounts_store.dart';
 import 'package:finamp/services/scrobble_service.dart';
+import 'package:finamp/services/mobile_data_transcoding.dart';
 import 'package:finamp/screens/scrobbling_settings_screen.dart';
 import 'package:finamp/screens/discord_login_screen.dart';
 import 'package:finamp/services/downloads_service.dart';
@@ -173,6 +174,7 @@ Future<void> main(List<String> args, {bool integrationTesting = false, bool logi
     _mainLog.info("Setup PlayOnService");
     GetIt.instance.registerSingleton(await ExternalAccountsStore.create());
     _mainLog.info("Setup external accounts store");
+    await MobileDataTranscoding.initialize();
     await _setupPlaybackServices();
     GetIt.instance.registerSingleton(ScrobbleService());
     _mainLog.info("Setup scrobbling");
