@@ -394,7 +394,7 @@ class _AndroidRpc {
     }
     _gateway?.setActivity(
       DiscordPresenceActivity(
-        name: "Finamp",
+        name: "Namp",
         details: data.title,
         state: data.artist,
         largeImage: data.largeImage,

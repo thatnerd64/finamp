@@ -89,7 +89,7 @@ class _ScrobblingSettingsScreenState extends ConsumerState<ScrobblingSettingsScr
             ),
             const DiscordRpcIconSelector(),
             note(
-              "Android has no Discord RPC, so Finamp connects to Discord as your account (like Kizzy does). "
+              "Android has no Discord RPC, so Namp connects to Discord as your account (like Kizzy does). "
               "Discord's terms do not allow automating user accounts; use at your own risk. "
               "Album art only shows if your server has a public address Discord can reach.",
             ),

@@ -1,5 +1,5 @@
 {
-    "finamp": "Finamp",
+    "finamp": "Namp",
     "@finamp": {
         "description": "App name, possibly translated"
     },
@@ -19,7 +19,7 @@
     "@startupErrorWorkaround": {
         "description": "The subtitle for how to manually recover from a startup error"
     },
-    "about": "About Finamp",
+    "about": "About Namp",
     "@about": {
         "description": "Label for the about/info button on the settings screen"
     },
@@ -39,7 +39,7 @@
     "@aboutTranslations": {
         "description": "Link to the translation project, shown in the about screen."
     },
-    "aboutThanks": "Thank you for using Finamp!",
+    "aboutThanks": "Thank you for using Namp!",
     "@aboutThanks": {
         "description": "Thank you message shown in the about screen."
     },

@@ -63,7 +63,7 @@ android {
             signingConfig signingConfigs.release
             // Fork builds install next to the official app instead of clashing with its signature.
             applicationIdSuffix '.fork'
-            resValue "string", "app_name", "Finamp Fork"
+            resValue "string", "app_name", "Namp"
             // shrinkResources false
             // minifyEnabled false
         }

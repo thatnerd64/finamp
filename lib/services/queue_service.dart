@@ -324,7 +324,7 @@ class QueueService {
           .toList(),
     );
     // _audioHandler.queueTitle.add(_order.originalSource.name.toString());
-    _audioHandler.queueTitle.add("Finamp");
+    _audioHandler.queueTitle.add("Namp");
 
     if (_savedQueueState == SavedQueueState.saving) {
       // Keep the seek position unless the track changed, otherwise a paused queue restores from the start

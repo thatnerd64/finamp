@@ -161,8 +161,8 @@ class ListenBrainzClient {
     "track_name": t.title,
     if (t.album != null) "release_name": t.album,
     "additional_info": {
-      "media_player": "Finamp",
-      "submission_client": "Finamp",
+      "media_player": "Namp",
+      "submission_client": "Namp",
       "submission_client_version": _clientVersion,
       if (t.durationSeconds != null) "duration_ms": t.durationSeconds! * 1000,
       if (t.trackNumber != null) "tracknumber": t.trackNumber,

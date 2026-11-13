@@ -269,7 +269,7 @@ class DiscordGatewayPresence {
       "d": {
         "token": token,
         "capabilities": 65,
-        "properties": {"os": "Android", "browser": "Discord Android", "device": "Finamp"},
+        "properties": {"os": "Android", "browser": "Discord Android", "device": "Namp"},
         "presence": {"status": status, "since": 0, "activities": <dynamic>[], "afk": true},
         "compress": false,
       },
