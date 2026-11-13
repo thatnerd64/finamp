@@ -10,6 +10,7 @@ import 'package:finamp/services/queue_service.dart';
 import 'package:finamp/services/scrolling_text_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:finamp/services/battery_saver.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TrackNameContent extends ConsumerWidget {
@@ -70,7 +71,9 @@ class TrackNameContent extends ConsumerWidget {
                     textAlign: TextAlign.center,
                   );
                 } else {
-                  if (wouldOverflow && ref.watch(finampSettingsProvider.oneLineMarqueeTextButton)) {
+                  if (wouldOverflow &&
+                      ref.watch(finampSettingsProvider.oneLineMarqueeTextButton) &&
+                      !ref.watch(reduceAnimationsProvider)) {
                     return SizedBox(
                       width: 280,
                       height: 30,

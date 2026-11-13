@@ -320,7 +320,6 @@ class ScrobbleService {
     PackageInfo.fromPlatform().then((info) => _clientVersion = info.version).ignore();
     _audio.mediaItem.listen(_onMediaItem);
     _audio.playbackState.listen(_onPlaybackState);
-    _retryTimer = Timer.periodic(const Duration(minutes: 5), (_) => flush());
     Future.delayed(const Duration(seconds: 20), flush);
   }
 
@@ -510,6 +509,13 @@ class ScrobbleService {
       _log.warning("Scrobble flush failed", e, st);
     } finally {
       _flushing = false;
+      // retry later only if something is still waiting
+      if (_queue.isNotEmpty && _retryTimer == null) {
+        _retryTimer = Timer(const Duration(minutes: 10), () {
+          _retryTimer = null;
+          flush();
+        });
+      }
     }
   }
 

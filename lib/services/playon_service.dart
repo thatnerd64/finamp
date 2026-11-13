@@ -43,6 +43,26 @@ class PlayOnService {
   // If the connection retry loop is currently running
   bool retryActive = false;
 
+  /// Set by battery saver while nothing is playing; blocks (re)connecting.
+  bool suspendedForBattery = false;
+
+  /// Closes the connection to save battery. Remote control from other
+  /// clients stops working until [resumeFromBattery].
+  void suspendForBattery() {
+    if (suspendedForBattery) return;
+    suspendedForBattery = true;
+    _playOnServiceLogger.info("Suspending PlayOn connection to save battery");
+    closeListener();
+  }
+
+  /// Reconnects after [suspendForBattery], if the connection is wanted.
+  void resumeFromBattery() {
+    if (!suspendedForBattery) return;
+    suspendedForBattery = false;
+    _playOnServiceLogger.info("Resuming PlayOn connection");
+    if (socketState == SocketState.disconnected) unawaited(startListener());
+  }
+
   Future<void> initialize() async {
     _playOnServiceLogger.info("Initializing PlayOn service");
 
@@ -102,6 +122,7 @@ class PlayOnService {
     try {
       if (!FinampSettingsHelper.finampSettings.isOffline &&
           FinampSettingsHelper.finampSettings.enablePlayon &&
+          !suspendedForBattery &&
           _finampUserHelper.currentUser != null) {
         assert(socketState == SocketState.disconnected);
         _playOnServiceLogger.info("Attempting to start PlayOn listener");
@@ -240,7 +261,9 @@ class PlayOnService {
       onDone: () {
         _keepaliveSubscription?.cancel();
         socketState = SocketState.disconnected;
-        if (!FinampSettingsHelper.finampSettings.isOffline && FinampSettingsHelper.finampSettings.enablePlayon) {
+        if (!FinampSettingsHelper.finampSettings.isOffline &&
+            FinampSettingsHelper.finampSettings.enablePlayon &&
+            !suspendedForBattery) {
           _playOnServiceLogger.warning("WebSocket connection closed, attempting to reconnect");
           _startReconnectionLoop();
         }

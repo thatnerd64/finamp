@@ -1,5 +1,6 @@
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:finamp/services/battery_saver.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marquee/marquee.dart';
 
@@ -11,7 +12,7 @@ class OneLineMarqueeHelper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(finampSettingsProvider.oneLineMarqueeTextButton)) {
+    if (!ref.watch(finampSettingsProvider.oneLineMarqueeTextButton) || ref.watch(reduceAnimationsProvider)) {
       return Text(text, style: style, overflow: TextOverflow.ellipsis, maxLines: 1);
     }
 

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:finamp/services/battery_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
@@ -31,6 +32,7 @@ class ExternalAccountsStore extends ChangeNotifier {
   static const _kScrobbleQueue = "${_prefix}scrobbleQueue";
   static const _kSendNowPlaying = "${_prefix}scrobbleNowPlaying";
   static const _kTranscodeOnMobile = "${_prefix}transcodeOnMobileData";
+  static const _kBatterySaver = "${_prefix}batterySaverMode";
 
   static const defaultListenBrainzUrl = "https://api.listenbrainz.org";
 
@@ -55,6 +57,7 @@ class ExternalAccountsStore extends ChangeNotifier {
           _kScrobbleQueue,
           _kSendNowPlaying,
           _kTranscodeOnMobile,
+          _kBatterySaver,
         },
       ),
     );
@@ -166,6 +169,12 @@ class ExternalAccountsStore extends ChangeNotifier {
   /// Transcode only while on mobile data (see MobileDataTranscoding).
   bool get transcodeOnMobileData => _prefs.getBool(_kTranscodeOnMobile) ?? false;
   Future<void> setTranscodeOnMobileData(bool v) => _setBool(_kTranscodeOnMobile, v);
+
+  BatterySaverMode get batterySaverMode => BatterySaverMode.values.firstWhere(
+    (m) => m.name == _prefs.getString(_kBatterySaver),
+    orElse: () => BatterySaverMode.followSystem,
+  );
+  Future<void> setBatterySaverMode(BatterySaverMode m) => _setString(_kBatterySaver, m.name);
 
   /// Scrobbles that could not be sent yet, oldest first. Each entry is a JSON
   /// object understood by [ScrobbleService].

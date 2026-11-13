@@ -44,6 +44,8 @@ import 'package:finamp/services/discord_rpc.dart';
 import 'package:finamp/services/external_accounts_store.dart';
 import 'package:finamp/services/scrobble_service.dart';
 import 'package:finamp/services/mobile_data_transcoding.dart';
+import 'package:finamp/services/battery_saver.dart';
+import 'package:finamp/screens/battery_settings_screen.dart';
 import 'package:finamp/screens/scrobbling_settings_screen.dart';
 import 'package:finamp/screens/discord_login_screen.dart';
 import 'package:finamp/services/downloads_service.dart';
@@ -177,6 +179,7 @@ Future<void> main(List<String> args, {bool integrationTesting = false, bool logi
     await MobileDataTranscoding.initialize();
     await _setupPlaybackServices();
     GetIt.instance.registerSingleton(ScrobbleService());
+    await BatterySaver.instance.initialize();
     _mainLog.info("Setup scrobbling");
     _mainLog.info("Setup audio player");
     await _setupKeepScreenOnHelper();
@@ -1028,6 +1031,7 @@ class FinampApp extends ConsumerWidget {
         PlaybackReportingSettingsScreen.routeName: (context) => const PlaybackReportingSettingsScreen(),
         ScrobblingSettingsScreen.routeName: (context) => const ScrobblingSettingsScreen(),
         DiscordLoginScreen.routeName: (context) => const DiscordLoginScreen(),
+        BatterySettingsScreen.routeName: (context) => const BatterySettingsScreen(),
         AudioServiceSettingsScreen.routeName: (context) => const AudioServiceSettingsScreen(),
         VolumeNormalizationSettingsScreen.routeName: (context) => const VolumeNormalizationSettingsScreen(),
         InteractionSettingsScreen.routeName: (context) => const InteractionSettingsScreen(),

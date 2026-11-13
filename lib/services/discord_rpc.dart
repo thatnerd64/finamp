@@ -3,6 +3,7 @@ import 'dart:core';
 import 'dart:io';
 
 import 'package:finamp/models/jellyfin_models.dart';
+import 'package:finamp/services/battery_saver.dart';
 import 'package:finamp/services/discord_gateway_presence.dart';
 import 'package:finamp/services/external_accounts_store.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
@@ -303,6 +304,7 @@ class _AndroidRpc {
   static DiscordGatewayPresence? _gateway;
   static Timer? _idleTimer;
   static Timer? _refreshTimer;
+  static Duration? _refreshPeriod;
   static bool _enabled = false;
 
   static const _idleDisconnect = Duration(minutes: 2);
@@ -326,9 +328,6 @@ class _AndroidRpc {
     }
     if (enabled && !_enabled) {
       _enabled = true;
-      _refreshTimer?.cancel();
-      // cheap: the gateway client drops updates that change nothing
-      _refreshTimer = Timer.periodic(const Duration(seconds: 15), (_) => update());
       update();
     } else if (!enabled && _enabled) {
       _enabled = false;
@@ -359,6 +358,8 @@ class _AndroidRpc {
     }
 
     if (data == null) {
+      _refreshTimer?.cancel();
+      _refreshTimer = null;
       _gateway?.setActivity(null);
       if (_gateway != null && _idleTimer == null) {
         _idleTimer = Timer(_idleDisconnect, () {
@@ -371,6 +372,14 @@ class _AndroidRpc {
 
     _idleTimer?.cancel();
     _idleTimer = null;
+    // Safety net for missed seeks/changes, only while playing. Playback events
+    // already trigger updates, so with battery saver this runs rarely.
+    final refreshEvery = Duration(seconds: BatterySaver.instance.active ? 120 : 30);
+    if (_refreshTimer == null || _refreshPeriod != refreshEvery) {
+      _refreshTimer?.cancel();
+      _refreshPeriod = refreshEvery;
+      _refreshTimer = Timer.periodic(refreshEvery, (_) => update());
+    }
     final store = ExternalAccountsStore.instance;
     final token = store.discordToken;
     if (token == null) return;

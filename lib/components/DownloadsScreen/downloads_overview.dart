@@ -11,23 +11,54 @@ import '../global_snackbar.dart';
 
 const double downloadsOverviewCardLoadingHeight = 120;
 
-class DownloadsOverview extends StatelessWidget {
+class DownloadsOverview extends StatefulWidget {
   const DownloadsOverview({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final downloadsService = GetIt.instance<DownloadsService>();
+  State<DownloadsOverview> createState() => _DownloadsOverviewState();
+}
 
+class _DownloadsOverviewState extends State<DownloadsOverview> with WidgetsBindingObserver {
+  final downloadsService = GetIt.instance<DownloadsService>();
+  Timer? _refresh;
+
+  // This used to start a new timer on every build, so they piled up and kept
+  // running database counts every 4 s for as long as the screen existed.
+  // Now there is one timer, paused while the app is in the background.
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
     downloadsService.updateDownloadCounts();
     downloadsService.restartDownloads();
-    Timer.periodic(const Duration(seconds: 4), (timer) {
-      if (context.mounted) {
-        downloadsService.updateDownloadCounts();
-      } else {
-        timer.cancel();
-      }
-    });
+    _startRefresh();
+  }
 
+  void _startRefresh() {
+    _refresh?.cancel();
+    _refresh = Timer.periodic(const Duration(seconds: 4), (_) => downloadsService.updateDownloadCounts());
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      downloadsService.updateDownloadCounts();
+      _startRefresh();
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.hidden) {
+      _refresh?.cancel();
+      _refresh = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _refresh?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // This is refreshed once every 4 seconds by above timer
     return StreamBuilder<Map<String, int>>(
       stream: downloadsService.downloadCountsStream,

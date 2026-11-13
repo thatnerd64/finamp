@@ -15,6 +15,7 @@ import 'package:finamp/screens/layout_settings_screen.dart';
 import 'package:finamp/screens/network_settings_screen.dart';
 import 'package:finamp/screens/playback_reporting_settings_screen.dart';
 import 'package:finamp/screens/scrobbling_settings_screen.dart';
+import 'package:finamp/screens/battery_settings_screen.dart';
 import 'package:finamp/screens/quick_settings_screen.dart';
 import 'package:finamp/screens/transcoding_settings_screen.dart';
 import 'package:finamp/screens/view_selector.dart';
@@ -179,6 +180,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             leading: const Icon(TablerIcons.brand_discord),
             title: const Text("Discord & scrobbling"),
             onTap: () => Navigator.of(context).pushNamed(ScrobblingSettingsScreen.routeName),
+          ),
+          ListTile(
+            leading: const Icon(Icons.battery_saver_outlined),
+            title: const Text("Battery"),
+            onTap: () => Navigator.of(context).pushNamed(BatterySettingsScreen.routeName),
           ),
           ListTile(
             leading: const Icon(Icons.equalizer_rounded),

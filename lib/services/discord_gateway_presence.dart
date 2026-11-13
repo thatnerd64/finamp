@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
@@ -56,7 +57,10 @@ class DiscordGatewayPresence {
     this.onAuthFailed,
   });
 
-  static const _gatewayUrl = "wss://gateway.discord.gg/?v=10&encoding=json";
+  // zlib-stream: a user session receives every event of every server the
+  // account is in, so compressing the stream cuts data (and radio time) a lot.
+  static const _query = "?v=10&encoding=json&compress=zlib-stream";
+  static const _gatewayUrl = "wss://gateway.discord.gg/$_query";
   static const _api = "https://discord.com/api/v10";
 
   final String token;
@@ -125,7 +129,8 @@ class DiscordGatewayPresence {
 
   Future<void> _connect() async {
     if (!_running) return;
-    final url = _resumeUrl != null && _sessionId != null ? "$_resumeUrl/?v=10&encoding=json" : _gatewayUrl;
+    final url = _resumeUrl != null && _sessionId != null ? "$_resumeUrl/$_query" : _gatewayUrl;
+    _inflater = ZlibStreamInflater();
     try {
       _socket = await WebSocket.connect(url).timeout(const Duration(seconds: 20));
     } catch (e) {
@@ -201,10 +206,30 @@ class DiscordGatewayPresence {
     }
   }
 
+  ZlibStreamInflater _inflater = ZlibStreamInflater();
+  static final _dispatchHead = RegExp(r'\{"t":"([A-Z_]+)","s":(\d+),"op":0,');
+  static const _neededDispatches = {"READY", "RESUMED"};
+
   void _onMessage(dynamic raw) {
+    final String text;
+    if (raw is List<int>) {
+      final inflated = _inflater.add(raw);
+      if (inflated == null) return; // message continues in the next frame
+      text = inflated;
+    } else {
+      text = raw as String;
+    }
+    // Most dispatches (messages, typing, other people's presences) are not
+    // ours to handle. Read just the sequence number from the start of the
+    // payload instead of parsing the whole thing.
+    final head = _dispatchHead.matchAsPrefix(text);
+    if (head != null && !_neededDispatches.contains(head.group(1))) {
+      _seq = int.parse(head.group(2)!);
+      return;
+    }
     final Map<String, dynamic> msg;
     try {
-      msg = jsonDecode(raw as String) as Map<String, dynamic>;
+      msg = jsonDecode(text) as Map<String, dynamic>;
     } catch (e) {
       return;
     }
@@ -428,5 +453,33 @@ class DiscordGatewayPresence {
       }
     }
     return _appAssets?[image];
+  }
+}
+
+/// Decoder for Discord's zlib-stream transport compression: one zlib stream
+/// per connection, each message ends with a sync flush (00 00 FF FF).
+class ZlibStreamInflater {
+  final _filter = RawZLibFilter.inflateFilter();
+  final _pending = BytesBuilder(copy: false);
+
+  /// Feeds one websocket frame. Returns the decoded message once a frame ends
+  /// with the flush marker, otherwise null.
+  String? add(List<int> frame) {
+    _pending.add(frame);
+    if (frame.length < 4 ||
+        frame[frame.length - 4] != 0x00 ||
+        frame[frame.length - 3] != 0x00 ||
+        frame[frame.length - 2] != 0xFF ||
+        frame[frame.length - 1] != 0xFF) {
+      return null;
+    }
+    final data = _pending.takeBytes();
+    _filter.process(data, 0, data.length);
+    final out = BytesBuilder(copy: false);
+    List<int>? chunk;
+    while ((chunk = _filter.processed(flush: true)) != null) {
+      out.add(chunk!);
+    }
+    return utf8.decode(out.takeBytes());
   }
 }
