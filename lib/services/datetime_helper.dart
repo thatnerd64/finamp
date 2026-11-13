@@ -1,4 +1,5 @@
 import 'package:finamp/l10n/app_localizations.dart';
+import 'package:finamp/services/app_foreground.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/utils/locale_helper.dart';
 import 'package:flutter/material.dart';
@@ -124,7 +125,7 @@ class DateTimeHelper {
     }
   }
 
-  static Stream<DateTime> get minuteTicker => Stream.periodic(const Duration(minutes: 1), (_) => DateTime.now());
+  static Stream<DateTime> get minuteTicker => AppForeground.minuteTicker;
 }
 
 class RelativeDateTimeText extends StatelessWidget {

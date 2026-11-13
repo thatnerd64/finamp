@@ -132,12 +132,53 @@ class QueueService {
       if (_audioHandler.audioSources.isNotEmpty && (previousIndex != _currentQueueIndex || _currentTrack == null)) {
         _queueServiceLogger.finer("Play queue index changed, new index: $_currentQueueIndex");
         _buildQueueFromNativePlayerQueue();
-      } else {
+      } else if (_isUserVisibleChange(event)) {
+        // Only pause/play and seeks need a quick save. Buffering updates arrive
+        // constantly while streaming and used to force a full queue save every
+        // 10 seconds instead of once a minute.
         _saveUpdateImmediate = true;
       }
+      _lastPlaybackEvent = event;
+      _ensureSaveTimer();
     });
 
-    Stream<void>.periodic(const Duration(seconds: 10)).listen((event) {
+    _initRemainingListeners();
+  }
+
+  PlaybackState? _lastPlaybackEvent;
+  Timer? _saveTimer;
+
+  bool _isUserVisibleChange(PlaybackState event) {
+    final prev = _lastPlaybackEvent;
+    if (prev == null || prev.playing != event.playing || prev.processingState != event.processingState) return true;
+    // a seek: the reported position does not follow from the previous one
+    final expected = prev.playing
+        ? prev.updatePosition + (event.updateTime.difference(prev.updateTime) * prev.speed)
+        : prev.updatePosition;
+    return (event.updatePosition - expected).abs() > const Duration(seconds: 2);
+  }
+
+  /// The save/radio check timer only runs while playing (or while a save is
+  /// still pending), instead of waking the phone every 10 s forever.
+  void _ensureSaveTimer() {
+    if (_saveTimer != null) return;
+    if (!_needsSaveTick) return;
+    _saveTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      _onSaveTick();
+      if (!_needsSaveTick) {
+        timer.cancel();
+        _saveTimer = null;
+      }
+    });
+  }
+
+  // While paused, ticks are only useful to write one last save, which only
+  // happens in the saving state.
+  bool get _needsSaveTick =>
+      !_audioHandler.paused || (_saveUpdateImmediate && _savedQueueState == SavedQueueState.saving);
+
+  void _onSaveTick() {
+    {
       // Update once per minute while playing in background, and up to once every ten seconds if
       // pausing/seeking is occurring
       // We also update on every track switch.
@@ -156,8 +197,10 @@ class QueueService {
       }
       // just in case, check if there are radio tracks missing (due to errors, race conditions, etc.)
       unawaited(maybeAddRadioTracks());
-    });
+    }
+  }
 
+  void _initRemainingListeners() {
     // check if new radio tracks are needed whenever the queue changes in some way
     _queueStream.listen((_) {
       unawaited(maybeAddRadioTracks());

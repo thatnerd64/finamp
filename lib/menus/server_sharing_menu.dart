@@ -78,6 +78,7 @@ class ServerSharingMenuControls extends ConsumerStatefulWidget {
 }
 
 class _ServerSharingMenuControlsState extends ConsumerState<ServerSharingMenuControls> {
+  AppLifecycleListener? _lifecycleListener;
   final serverDiscoveryEmulationService = JellyfinServerClientDiscovery();
 
   late bool serverSharingEnabled;
@@ -89,7 +90,7 @@ class _ServerSharingMenuControlsState extends ConsumerState<ServerSharingMenuCon
     serverSharingEnabled = false;
     toggleableListTileKey = UniqueKey();
 
-    AppLifecycleListener(
+    _lifecycleListener = AppLifecycleListener(
       onRestart: () {},
       onHide: () {
         // If the app is hidden, we stop advertising the server
@@ -103,6 +104,7 @@ class _ServerSharingMenuControlsState extends ConsumerState<ServerSharingMenuCon
 
   @override
   void dispose() {
+    _lifecycleListener?.dispose();
     serverSharingEnabled = false;
     serverDiscoveryEmulationService.dispose();
     super.dispose();

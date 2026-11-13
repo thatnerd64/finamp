@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:finamp/services/battery_saver.dart';
 import 'package:finamp/services/discord_rpc.dart';
 import 'package:finamp/services/music_player_background_task.dart';
 import 'package:finamp/services/playon_service.dart';
@@ -47,11 +48,15 @@ class PlaybackHistoryService {
   final int _maxQueueLengthToReport = 100;
 
   PlaybackHistoryService() {
+    // Report once when going back online. This used to fire on every settings
+    // write (volume slider, queue panel state, ...), each sending a request.
+    var wasOffline = FinampSettingsHelper.finampSettings.isOffline;
     FinampSettingsHelper.finampSettingsListener.addListener(() {
       final isOffline = FinampSettingsHelper.finampSettings.isOffline;
-      if (!isOffline) {
+      if (wasOffline && !isOffline) {
         _updatePlaybackInfo();
       }
+      wasOffline = isOffline;
     });
 
     bool throttleRemoteSessionReporting = false;
@@ -222,6 +227,8 @@ class PlaybackHistoryService {
     _periodicUpdateTimer = Timer.periodic(
       Duration(seconds: FinampSettingsHelper.finampSettings.periodicPlaybackSessionUpdateFrequencySeconds),
       (timer) {
+        // with battery saver, a paused player does not keep pinging the server
+        if (_audioService.paused && BatterySaver.instance.active) return;
         _reportPeriodicSessionStatus();
       },
     );

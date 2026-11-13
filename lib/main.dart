@@ -45,6 +45,7 @@ import 'package:finamp/services/external_accounts_store.dart';
 import 'package:finamp/services/scrobble_service.dart';
 import 'package:finamp/services/mobile_data_transcoding.dart';
 import 'package:finamp/services/battery_saver.dart';
+import 'package:finamp/services/app_foreground.dart';
 import 'package:finamp/screens/battery_settings_screen.dart';
 import 'package:finamp/screens/scrobbling_settings_screen.dart';
 import 'package:finamp/screens/discord_login_screen.dart';
@@ -179,6 +180,7 @@ Future<void> main(List<String> args, {bool integrationTesting = false, bool logi
     await MobileDataTranscoding.initialize();
     await _setupPlaybackServices();
     GetIt.instance.registerSingleton(ScrobbleService());
+    AppForeground.initialize();
     await BatterySaver.instance.initialize();
     _mainLog.info("Setup scrobbling");
     _mainLog.info("Setup audio player");

@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'package:finamp/services/app_foreground.dart';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:finamp/color_schemes.g.dart';
 import 'package:finamp/components/AddToPlaylistScreen/add_to_playlist_button.dart';
 import 'package:finamp/components/audio_fade_progress_visualizer_container.dart';
@@ -285,7 +285,7 @@ class NowPlayingBar extends ConsumerWidget {
                               if (ref.watch(finampSettingsProvider.showProgressOnNowPlayingBar))
                                 Positioned.fill(
                                   child: StreamBuilder<Duration>(
-                                    stream: AudioService.position,
+                                    stream: AppForeground.position,
                                     initialData: audioHandler.playbackState.value.position,
                                     builder: (context, snapshot) {
                                       if (snapshot.hasData) {
@@ -355,7 +355,7 @@ class NowPlayingBar extends ConsumerWidget {
                                                 ),
                                               ),
                                               StreamBuilder<Duration>(
-                                                stream: AudioService.position,
+                                                stream: AppForeground.position,
                                                 initialData: audioHandler.playbackState.value.position,
                                                 builder: (context, snapshot) {
                                                   if (snapshot.hasData) {

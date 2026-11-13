@@ -1,7 +1,7 @@
 import 'dart:async';
+import 'package:finamp/services/app_foreground.dart';
 import 'dart:math';
 
-import 'package:audio_service/audio_service.dart';
 import 'package:finamp/components/AddToPlaylistScreen/add_to_playlist_button.dart';
 import 'package:finamp/components/AlbumScreen/track_list_tile.dart';
 import 'package:finamp/components/Buttons/finamp_extended_floating_action_button.dart';
@@ -97,6 +97,15 @@ class _QueueListState extends ConsumerState<QueueList> {
 
   late List<Widget> _contents;
 
+  StreamSubscription<FinampQueueInfo?>? _queueSubscription;
+
+  @override
+  void dispose() {
+    _queueSubscription?.cancel();
+    widget.scrollController.removeListener(_updateJumpToTop);
+    super.dispose();
+  }
+
   // Used to jump when changing playback order
   final nextUpHeaderKey = GlobalKey();
   final queueHeaderKey = GlobalKey();
@@ -105,7 +114,7 @@ class _QueueListState extends ConsumerState<QueueList> {
   void initState() {
     super.initState();
 
-    _queueService.getQueueStream().listen((queueInfo) {
+    _queueSubscription = _queueService.getQueueStream().listen((queueInfo) {
       _source = queueInfo?.source;
       _previousTrackCount = queueInfo?.previousTracks.length ?? 0;
     });
@@ -792,7 +801,7 @@ class _CurrentTrackState extends ConsumerState<CurrentTrack> {
                         children: [
                           Positioned.fill(
                             child: StreamBuilder<Duration>(
-                              stream: AudioService.position,
+                              stream: AppForeground.position,
                               initialData: _audioHandler.playbackState.value.position,
                               builder: (context, snapshot) {
                                 if (snapshot.hasData) {
@@ -864,7 +873,7 @@ class _CurrentTrackState extends ConsumerState<CurrentTrack> {
                                           Row(
                                             children: [
                                               StreamBuilder<Duration>(
-                                                stream: AudioService.position,
+                                                stream: AppForeground.position,
                                                 initialData: _audioHandler.playbackState.value.position,
                                                 builder: (context, snapshot) {
                                                   final TextStyle style = TextStyle(

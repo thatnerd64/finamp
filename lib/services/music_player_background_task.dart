@@ -507,23 +507,29 @@ class MusicPlayerBackgroundTask extends BaseAudioHandler with SeekHandler, Queue
       _audioServiceBackgroundTaskLogger.severe("Player error: $error", error);
     });
 
-    // trigger sleep timer early if we're almost at the end of the final track
-    _player.positionStream.listen((position) {
-      if (sleepTimer?.remainingTracks == 1 &&
-          ((mediaItem.value?.duration ?? Duration.zero) - position).inMilliseconds / _player.speed <=
-              // even if fade out is disabled, we stop a bit early to avoid advancing to the next track
-              max(
-                Duration(milliseconds: 500).inMilliseconds,
-                FinampSettingsHelper.finampSettings.audioFadeOutDuration.inMilliseconds,
-              )) {
-        _audioServiceBackgroundTaskLogger.info(
-          "Sleep timer: triggering early end of final track "
-          "(remaining position: ${((mediaItem.value?.duration ?? Duration.zero) - position).inMilliseconds}ms, "
-          "threshold: ${max(Duration(milliseconds: 500).inMilliseconds, FinampSettingsHelper.finampSettings.audioFadeOutDuration.inMilliseconds)}ms)",
-        );
-        sleepTimer?.onTrackCompleted(trackEndedNormally: true, track: mediaItem.value);
-      }
-    });
+    // trigger sleep timer early if we're almost at the end of the final track.
+    // The position stream ticks several times a second, so only listen to it
+    // while a sleep timer with a track count is set.
+    final sleepTimerStream = BehaviorSubject<SleepTimer?>.seeded(_timer.value);
+    _timer.addListener(() => sleepTimerStream.add(_timer.value));
+    sleepTimerStream
+        .switchMap((t) => t != null && t.tracksLength > 0 ? _player.positionStream : Stream<Duration>.empty())
+        .listen((position) {
+          if (sleepTimer?.remainingTracks == 1 &&
+              ((mediaItem.value?.duration ?? Duration.zero) - position).inMilliseconds / _player.speed <=
+                  // even if fade out is disabled, we stop a bit early to avoid advancing to the next track
+                  max(
+                    Duration(milliseconds: 500).inMilliseconds,
+                    FinampSettingsHelper.finampSettings.audioFadeOutDuration.inMilliseconds,
+                  )) {
+            _audioServiceBackgroundTaskLogger.info(
+              "Sleep timer: triggering early end of final track "
+              "(remaining position: ${((mediaItem.value?.duration ?? Duration.zero) - position).inMilliseconds}ms, "
+              "threshold: ${max(Duration(milliseconds: 500).inMilliseconds, FinampSettingsHelper.finampSettings.audioFadeOutDuration.inMilliseconds)}ms)",
+            );
+            sleepTimer?.onTrackCompleted(trackEndedNormally: true, track: mediaItem.value);
+          }
+        });
 
     // Special processing for state transitions.
     _player.processingStateStream.listen((event) async {

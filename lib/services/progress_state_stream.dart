@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'app_foreground.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -19,7 +20,7 @@ Stream<ProgressState> get progressStateStream {
   return Rx.combineLatest3<MediaItem?, PlaybackState, Duration, ProgressState>(
     audioHandler.mediaItem,
     audioHandler.playbackState,
-    AudioService.position.startWith(audioHandler.playbackState.value.position),
+    AppForeground.position.startWith(audioHandler.playbackState.value.position),
     (mediaItem, playbackState, position) => ProgressState(mediaItem, playbackState, position),
   );
 }

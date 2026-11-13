@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finamp/services/app_foreground.dart';
 import 'dart:io';
 
 import 'package:finamp/components/MusicScreen/item_wrapper.dart';
@@ -455,8 +456,13 @@ class FinampMusicScreenHeader extends ConsumerWidget implements PreferredSizeWid
 
 final isDownloadingOrSyncingPollingProvider = Provider((Ref ref) {
   final downloadsService = GetIt.instance<DownloadsService>();
-  // Schedule this provider to be re-polled in 4 seconds
-  Timer(Duration(seconds: 4), ref.invalidateSelf);
+  // Re-poll every 4 seconds while the UI is visible. In the background
+  // nothing shows this, so stop; coming back to the foreground re-runs it.
+  final visible = ref.watch(appVisibleProvider).valueOrNull ?? true;
+  if (visible) {
+    final timer = Timer(Duration(seconds: 4), ref.invalidateSelf);
+    ref.onDispose(timer.cancel);
+  }
   // TODO do we want to show downloading separate from syncing?
   return downloadsService.syncBuffer.isRunning ||
       downloadsService.deleteBuffer.isRunning ||
