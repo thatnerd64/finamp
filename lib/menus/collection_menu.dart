@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:finamp/components/themed_bottom_sheet.dart';
 import 'package:finamp/menus/components/menuEntries/instant_mix_menu_entry.dart';
+import 'package:finamp/menus/components/menuEntries/play_on_device_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/restore_queue_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/start_radio_menu_entry.dart';
@@ -31,6 +32,7 @@ Future<void> showModalCollectionMenu({
       if (queueInfo != null) RestoreQueueMenuEntry(queueInfo: queueInfo),
       // AddToPlaylistMenuEntry(item: playableItem),
       InstantMixMenuEntry(baseItem: item),
+      PlayOnDeviceMenuEntry(baseItem: item),
       // MixBuilderMenuEntry(baseItem: item),
       StartRadioMenuEntry(baseItem: item),
       // AdaptiveDownloadLockDeleteMenuEntry(baseItem: item),

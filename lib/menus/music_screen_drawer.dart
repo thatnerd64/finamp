@@ -12,6 +12,7 @@ import 'package:finamp/screens/downloads_screen.dart';
 import 'package:finamp/screens/logs_screen.dart';
 import 'package:finamp/screens/playback_history_screen.dart';
 import 'package:finamp/screens/queue_restore_screen.dart';
+import 'package:finamp/screens/remote_control_screen.dart';
 import 'package:finamp/screens/settings_screen.dart';
 import 'package:finamp/services/downloads_service.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
@@ -162,6 +163,16 @@ class MusicScreenDrawer extends ConsumerWidget {
                         ),
                         title: Text(AppLocalizations.of(context)!.queuesScreen, style: TextStyle(fontSize: 15.0)),
                         onTap: () => Navigator.of(context).pushNamed(QueueRestoreScreen.routeName),
+                        dense: true,
+                      ),
+                      ListTile(
+                        leading: const Padding(
+                          padding: EdgeInsets.only(left: 2.0, right: 12.0),
+                          child: Icon(Icons.cast, size: 20.0),
+                        ),
+                        title: const Text("Control devices", style: TextStyle(fontSize: 15.0)),
+                        enabled: !(settings?.isOffline ?? false),
+                        onTap: () => Navigator.of(context).pushNamed(RemoteControlScreen.routeName),
                         dense: true,
                       ),
                     ]),

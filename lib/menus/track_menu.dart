@@ -10,6 +10,7 @@ import 'package:finamp/menus/components/menuEntries/clear_queue_menu_entry.dart'
 import 'package:finamp/menus/components/menuEntries/create_playlist_from_current_queue.dart';
 import 'package:finamp/menus/components/menuEntries/delete_from_server_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/instant_mix_menu_entry.dart';
+import 'package:finamp/menus/components/menuEntries/play_on_device_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/lyrics_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/output_menu_entry.dart';
@@ -262,6 +263,7 @@ class _TrackMenuState extends ConsumerState<TrackMenu> with TickerProviderStateM
         onRemove: widget.queueItem == null ? widget.onRemoveFromList : null,
       ),
       InstantMixMenuEntry(baseItem: widget.item),
+      PlayOnDeviceMenuEntry(baseItem: widget.item),
       StartRadioMenuEntry(baseItem: widget.item),
       AdaptiveDownloadLockDeleteMenuEntry(baseItem: widget.item),
       ToggleFavoriteMenuEntry(baseItem: widget.item),

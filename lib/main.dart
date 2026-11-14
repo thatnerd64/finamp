@@ -47,6 +47,7 @@ import 'package:finamp/services/mobile_data_transcoding.dart';
 import 'package:finamp/services/battery_saver.dart';
 import 'package:finamp/services/app_foreground.dart';
 import 'package:finamp/screens/battery_settings_screen.dart';
+import 'package:finamp/screens/remote_control_screen.dart';
 import 'package:finamp/screens/scrobbling_settings_screen.dart';
 import 'package:finamp/screens/discord_login_screen.dart';
 import 'package:finamp/services/downloads_service.dart';
@@ -1034,6 +1035,7 @@ class FinampApp extends ConsumerWidget {
         ScrobblingSettingsScreen.routeName: (context) => const ScrobblingSettingsScreen(),
         DiscordLoginScreen.routeName: (context) => const DiscordLoginScreen(),
         BatterySettingsScreen.routeName: (context) => const BatterySettingsScreen(),
+        RemoteControlScreen.routeName: (context) => const RemoteControlScreen(),
         AudioServiceSettingsScreen.routeName: (context) => const AudioServiceSettingsScreen(),
         VolumeNormalizationSettingsScreen.routeName: (context) => const VolumeNormalizationSettingsScreen(),
         InteractionSettingsScreen.routeName: (context) => const InteractionSettingsScreen(),

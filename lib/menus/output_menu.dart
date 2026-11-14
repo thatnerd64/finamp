@@ -10,6 +10,7 @@ import 'package:finamp/components/themed_bottom_sheet.dart';
 import 'package:finamp/components/toggleable_list_tile.dart';
 import 'package:finamp/l10n/app_localizations.dart';
 import 'package:finamp/models/finamp_models.dart';
+import 'package:finamp/screens/remote_control_screen.dart';
 import 'package:finamp/services/feedback_helper.dart';
 import 'package:finamp/services/finamp_settings_helper.dart';
 import 'package:finamp/services/music_player_background_task.dart';
@@ -130,9 +131,33 @@ Future<void> showOutputMenu({required BuildContext context, bool usePlayerTheme 
               child: OutputTargetList(), // Pass the outputRoutes
             ),
           ),
+        SliverStickyHeader(
+          header: Padding(
+            padding: const EdgeInsets.only(top: 10.0, bottom: 8.0, left: 16.0, right: 16.0),
+            child: Text("Jellyfin devices", style: Theme.of(context).textTheme.titleMedium),
+          ),
+          sliver: MenuMask(
+            height: OutputMenuHeader.defaultHeight,
+            child: SliverToBoxAdapter(
+              child: Consumer(
+                builder: (context, ref, _) => ListTile(
+                  leading: const Icon(Icons.cast),
+                  title: const Text("Control other devices"),
+                  subtitle: const Text("TVs, computers and phones running Jellyfin"),
+                  enabled: !ref.watch(finampSettingsProvider.isOffline),
+                  onTap: () {
+                    final navigator = GlobalSnackbar.navigatorState ?? Navigator.of(context);
+                    Navigator.pop(context); // close the output menu
+                    navigator.pushNamed(RemoteControlScreen.routeName);
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
       ];
       // TODO better estimate, how to deal with lag getting playlists?
-      var stackHeight = MediaQuery.heightOf(context) * (Platform.isAndroid ? 0.65 : 0.4);
+      var stackHeight = MediaQuery.heightOf(context) * (Platform.isAndroid ? 0.75 : 0.55);
       return (stackHeight, menu);
     },
   );

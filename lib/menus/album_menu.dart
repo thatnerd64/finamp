@@ -5,6 +5,7 @@ import 'package:finamp/menus/components/menuEntries/adaptive_download_lock_delet
 import 'package:finamp/menus/components/menuEntries/add_to_playlist_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/delete_from_server_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/instant_mix_menu_entry.dart';
+import 'package:finamp/menus/components/menuEntries/play_on_device_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/mix_builder_menu_entry.dart';
 import 'package:finamp/menus/components/menuEntries/restore_queue_menu_entry.dart';
@@ -41,6 +42,7 @@ Future<void> showModalAlbumMenu({
       if (album is Album) ...[
         // instant mixes from arbitrary collection of tracks is not supported
         InstantMixMenuEntry(baseItem: baseItem),
+        PlayOnDeviceMenuEntry(baseItem: baseItem),
         MixBuilderMenuEntry(baseItem: baseItem),
         // radio requires a [BaseItemDto] as the source
         StartRadioMenuEntry(baseItem: baseItem),
